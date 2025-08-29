@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ========== APP INFORMATION ========== -->
+    <string name="app_name">Nordic Beacon Scanner</string>
+    <string name="app_description">Professional Nordic BLE beacon detection and monitoring</string>
+    
+    <!-- ========== MAIN ACTIVITY ========== -->
+    <string name="main_title">Nordic Beacon Scanner</string>
+    <string name="main_subtitle">Professional BLE beacon tracking</string>
+    
+    <string name="start_scanning">Start Scanning</string>
+    <string name="stop_scanning">Stop Scanning</string>
+    <string name="scan_status_idle">Ready to scan</string>
+    <string name="scan_status_scanning">Scanning for Nordic beacons...</string>
+    <string name="scan_status_stopped">Scanning stopped</string>
+    
+    <!-- ========== BEACON DETECTION ========== -->
+    <string name="beacon_detected_title">Nordic Beacon Detected!</string>
+    <string name="beacon_uuid_label">UUID:</string>
+    <string name="beacon_major_label">Major:</string>
+    <string name="beacon_minor_label">Minor:</string>
+    <string name="beacon_rssi_label">Signal Strength:</string>
+    <string name="beacon_distance_label">Distance:</string>
+    <string name="beacon_reliability_label">Reliability Score:</string>
+    
+    <string name="proximity_immediate">Immediate (&lt; 1m)</string>
+    <string name="proximity_near">Near (1-5m)</string>
+    <string name="proximity_far">Far (5-20m)</string>
+    <string name="proximity_very_far">Very Far (&gt; 20m)</string>
+    
+    <string name="signal_excellent">Excellent</string>
+    <string name="signal_good">Good</string>
+    <string name="signal_fair">Fair</string>
+    <string name="signal_poor">Poor</string>
+    <string name="signal_very_poor">Very Poor</string>
+    
+    <!-- ========== PERMISSIONS ========== -->
+    <string name="permission_bluetooth_title">Bluetooth Access Required</string>
+    <string name="permission_bluetooth_message">This app needs Bluetooth access to scan for Nordic beacons near you.</string>
+    
+    <string name="permission_location_title">Location Access Required</string>
+    <string name="permission_location_message">Location access is required by Android for Bluetooth Low Energy beacon scanning.</string>
+    
+    <string name="permission_background_location_title">Background Location Required</string>
+    <string name="permission_background_location_message">Allow location access while app is closed to continue beacon scanning when screen is off.</string>
+    
+    <string name="permission_granted">Permission granted</string>
+    <string name="permission_denied">Permission denied</string>
+    <string name="permission_required">Required permission</string>
+    
+    <!-- ========== SERVICE NOTIFICATIONS ========== -->
+    <string name="notification_scanning_title">Nordic Beacon Scanner</string>
+    <string name="notification_scanning_text">Scanning for Nordic beacons in background</string>
+    
+    <string name="notification_detection_title">Beacon Detected!</string>
+    <string name="notification_no_detections">No beacons found yet</string>
+    
+    <string name="notification_action_stop">Stop</string>
+    <string name="notification_action_view">View</string>
+    <string name="notification_action_retry">Retry</string>
+    <string name="notification_action_settings">Settings</string>
+    
+    <!-- ========== ERROR MESSAGES ========== -->
+    <string name="error_bluetooth_disabled">Bluetooth is disabled. Please enable Bluetooth to scan for beacons.</string>
+    <string name="error_location_disabled">Location services are disabled. Please enable location access.</string>
+    <string name="error_permissions_denied">Required permissions were denied. Cannot scan for beacons.</string>
+    <string name="error_service_failed">Beacon scanning service failed to start.</string>
+    <string name="error_system_incompatible">Device is not compatible with beacon scanning.</string>
+    
+    <!-- ========== SETTINGS & CONFIGURATION ========== -->
+    <string name="settings_title">Scanning Settings</string>
+    <string name="settings_scan_frequency">Scan Frequency</string>
+    <string name="settings_battery_optimization">Battery Optimization</string>
+    <string name="settings_signal_filtering">Signal Filtering</string>
+    
+    <string name="battery_optimization_title">Battery Optimization</string>
+    <string name="battery_optimization_message">For continuous background scanning, please disable battery optimization for this app.</string>
+    <string name="battery_optimization_action">Open Settings</string>
+    
+    <!-- ========== STATISTICS ========== -->
+    <string name="stats_title">Detection Statistics</string>
+    <string name="stats_total_detections">Total Detections:</string>
+    <string name="stats_unique_beacons">Unique Beacons:</string>
+    <string name="stats_average_signal">Average Signal:</string>
+    <string name="stats_average_distance">Average Distance:</string>
+    <string name="stats_scan_duration">Scan Duration:</string>
+    <string name="stats_detection_rate">Detection Rate:</string>
+    
+    <!-- ========== UNITS ========== -->
+    <string name="unit_dbm">dBm</string>
+    <string name="unit_meters">m</string>
+    <string name="unit_minutes">min</string>
+    <string name="unit_hours">h</string>
+    <string name="unit_per_hour">/hour</string>
+    <string name="unit_percent">%</string>
+    
+    <!-- ========== ACTIONS ========== -->
+    <string name="action_clear_history">Clear History</string>
+    <string name="action_export_data">Export Data</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_grant_permissions">Grant Permissions</string>
+    <string name="action_enable_bluetooth">Enable Bluetooth</string>
+    <string name="action_enable_location">Enable Location</string>
+    
+    <!-- ========== DIALOG MESSAGES ========== -->
+    <string name="dialog_clear_history_title">Clear Detection History</string>
+    <string name="dialog_clear_history_message">Are you sure you want to clear all beacon detection history? This action cannot be undone.</string>
+    
+    <string name="dialog_stop_scanning_title">Stop Beacon Scanning</string>
+    <string name="dialog_stop_scanning_message">Stop continuous Nordic beacon scanning? You can restart it anytime.</string>
+    
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_continue">Continue</string>
+    
+    <!-- ========== ACCESSIBILITY ========== -->
+    <string name="accessibility_beacon_icon">Nordic beacon icon</string>
+    <string name="accessibility_signal_strength">Signal strength indicator</string>
+    <string name="accessibility_start_scanning">Start Nordic beacon scanning</string>
+    <string name="accessibility_stop_scanning">Stop Nordic beacon scanning</string>
+</resources>

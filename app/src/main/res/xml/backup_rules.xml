@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Exclude sensitive beacon data from backups -->
+    <exclude domain="sharedpref" path="nordic_beacon_encrypted_prefs.xml"/>
+    <exclude domain="database" path="nordic_beacon_database"/>
+    
+    <!-- Include only necessary configuration -->
+    <include domain="sharedpref" path="app_preferences.xml"/>
+</full-backup-content>

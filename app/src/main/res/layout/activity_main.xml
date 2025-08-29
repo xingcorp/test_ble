@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_primary"
+    tools:context=".presentation.MainActivity">
+
+    <!-- ========== APP BAR ========== -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/nordic_blue"
+            app:title="@string/app_name"
+            app:titleTextColor="@android:color/white"
+            app:subtitle="@string/app_description"
+            app:subtitleTextColor="@android:color/white" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- ========== SCANNING STATUS CARD ========== -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/status_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:id="@+id/status_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/scan_status_idle"
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        android:textColor="@color/text_primary"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:id="@+id/status_subtitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="🎯 Nordic UUID: FDA50693-..."
+                        android:textAppearance="?attr/textAppearanceBody2"
+                        android:textColor="@color/text_secondary"
+                        android:gravity="center" />
+
+                    <!-- Scanning Progress Indicator -->
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/scanning_progress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:indeterminate="true"
+                        android:visibility="gone"
+                        app:indicatorColor="@color/nordic_blue"
+                        app:trackColor="@color/nordic_blue_light" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ========== CONTROL BUTTONS ========== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_start_scanning"
+                    style="@style/Widget.Material3.Button.TextButton.Icon"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:text="@string/start_scanning"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/success_green"
+                    app:icon="@drawable/ic_play"
+                    app:iconTint="@color/white" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_stop_scanning"
+                    style="@style/Widget.Material3.Button.TextButton.Icon"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/stop_scanning"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/error_red"
+                    app:icon="@drawable/ic_stop"
+                    app:iconTint="@color/white"
+                    android:enabled="false" />
+
+            </LinearLayout>
+
+            <!-- ========== DETECTION STATISTICS ========== -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/stats_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/stats_title"
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        android:textColor="@color/text_primary"
+                        android:layout_marginBottom="12dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/stats_total_detections"
+                            android:textAppearance="?attr/textAppearanceBody2"
+                            android:textColor="@color/text_secondary" />
+
+                        <TextView
+                            android:id="@+id/txt_detection_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textAppearance="?attr/textAppearanceBody1"
+                            android:textColor="@color/nordic_blue"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/stats_scan_duration"
+                            android:textAppearance="?attr/textAppearanceBody2"
+                            android:textColor="@color/text_secondary" />
+
+                        <TextView
+                            android:id="@+id/txt_scan_duration"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 @string/unit_minutes"
+                            android:textAppearance="?attr/textAppearanceBody1"
+                            android:textColor="@color/text_primary" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ========== BEACON DETECTIONS LIST ========== -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/detections_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Card Header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="20dp"
+                        android:paddingBottom="12dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Recent Detections"
+                            android:textAppearance="?attr/textAppearanceHeadline6"
+                            android:textColor="@color/text_primary" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_clear_history"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/action_clear_history"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            android:minWidth="0dp"
+                            android:padding="8dp" />
+
+                    </LinearLayout>
+
+                    <!-- Detections RecyclerView placeholder -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recycler_detections"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:minHeight="100dp"
+                        tools:itemCount="3"
+                        tools:listitem="@layout/item_beacon_detection" />
+
+                    <!-- Empty state -->
+                    <TextView
+                        android:id="@+id/txt_no_detections"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:text="🔍 No Nordic beacons detected yet.\nStart scanning to begin detection."
+                        android:textAppearance="?attr/textAppearanceBody2"
+                        android:textColor="@color/text_hint"
+                        android:gravity="center"
+                        android:layout_margin="16dp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- ========== FLOATING ACTION BUTTON ========== -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_scan_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:contentDescription="@string/accessibility_start_scanning"
+        app:srcCompat="@drawable/ic_bluetooth_searching"
+        app:backgroundTint="@color/nordic_blue"
+        app:tint="@color/white" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
