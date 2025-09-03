@@ -2,10 +2,21 @@
 
 # ========== GRADLE FILES ==========
 .gradle/
+**/.gradle/
 **/build/
 build/
 !gradle/wrapper/gradle-wrapper.properties
 /local.properties
+
+# ========== GRADLE CACHE & BUILD ARTIFACTS ==========
+*.bin
+*.lock
+*.probe
+*.dex
+**/*.bin
+**/*.lock
+**/*.probe
+**/*.dex
 
 # ========== ANDROID STUDIO ==========
 .idea/
