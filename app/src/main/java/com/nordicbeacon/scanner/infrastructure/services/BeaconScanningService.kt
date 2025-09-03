@@ -80,6 +80,12 @@ class BeaconScanningService : LifecycleService() {
         Timber.i("🎯 BeaconScanningService start command received")
         Timber.i("🔧 Intent: ${intent?.action} | Flags: $flags | StartId: $startId")
         
+        // Prevent duplicate starts when service already running
+        if (isServiceRunning && intent?.action == ACTION_START_SCANNING) {
+            Timber.w("⚠️ Service already running - ignoring duplicate start request")
+            return START_NOT_STICKY
+        }
+        
         when (intent?.action) {
             ACTION_START_SCANNING -> handleStartScanning()
             ACTION_STOP_SCANNING -> handleStopScanning()
@@ -87,9 +93,9 @@ class BeaconScanningService : LifecycleService() {
             else -> handleDefaultStart()
         }
         
-        // START_STICKY ensures service restarts after system kill
-        // Critical cho background persistence when app closed/screen off
-        return START_STICKY
+        // Return START_NOT_STICKY to prevent automatic restart loops
+        // Service will only restart when explicitly started by the app
+        return START_NOT_STICKY
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -189,7 +195,8 @@ class BeaconScanningService : LifecycleService() {
         var retryCount = 0
         val maxRetries = 3
         
-        while (retryCount < maxRetries && !serviceJob!!.isCancelled) {
+        // Fix NPE: use coroutineContext instead of serviceJob
+        while (retryCount < maxRetries && currentCoroutineContext().isActive) {
             try {
                 // Step 1: Validate system requirements
                 val systemValidation = systemCompatibilityUseCase.validateSystemRequirements()

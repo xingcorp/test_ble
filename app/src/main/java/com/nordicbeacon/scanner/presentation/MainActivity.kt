@@ -23,6 +23,7 @@ import com.nordicbeacon.scanner.core.permissions.PermissionGroups
 import com.nordicbeacon.scanner.core.permissions.PermissionResult
 import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -53,6 +54,11 @@ class MainActivity : FragmentActivity() {
     @Inject lateinit var userEducationHelper: UserEducationHelper
     @Inject lateinit var analyticsIntegrationManager: AnalyticsIntegrationManager
     @Inject lateinit var permissionManager: PermissionManager
+    
+    // Service state management
+    private var isServiceStarting = false
+    private var lastServiceStartTime = 0L
+    private val SERVICE_START_DEBOUNCE_MS = 2000L // 2 seconds debounce
     
     // ========== PERMISSION HANDLING (NEW SYSTEM) ==========
     
@@ -98,7 +104,12 @@ class MainActivity : FragmentActivity() {
         viewModel.checkServiceStatus()
 
         // Android 14+: ensure we (re-)start scanning only when activity is foreground (eligible state)
-        checkPermissionsAndStartScanning()
+        // Only check permissions if service not already starting
+        if (!isServiceStarting) {
+            checkPermissionsAndStartScanning()
+        } else {
+            Timber.d("🔄 Service already starting - skipping permission check")
+        }
     }
 
     override fun onPause() {
@@ -613,6 +624,16 @@ class MainActivity : FragmentActivity() {
      * 🚀 Start beacon scanning service
      */
     private fun startBeaconScanningService() {
+        // Debounce service starts to prevent duplicate calls
+        val now = System.currentTimeMillis()
+        if (isServiceStarting || (now - lastServiceStartTime < SERVICE_START_DEBOUNCE_MS)) {
+            Timber.w("⚠️ Service start already in progress or too frequent - debounced")
+            return
+        }
+        
+        isServiceStarting = true
+        lastServiceStartTime = now
+        
         try {
             val serviceIntent = BeaconScanningService.createStartIntent(this)
             
@@ -624,8 +645,15 @@ class MainActivity : FragmentActivity() {
             
             Timber.i("🚀 Nordic beacon scanning service started")
             
+            // Reset flag after a delay
+            lifecycleScope.launch {
+                delay(SERVICE_START_DEBOUNCE_MS)
+                isServiceStarting = false
+            }
+            
         } catch (e: Exception) {
             Timber.e(e, "❌ Failed to start beacon scanning service")
+            isServiceStarting = false
             handleServiceStartError(e)
         }
     }
