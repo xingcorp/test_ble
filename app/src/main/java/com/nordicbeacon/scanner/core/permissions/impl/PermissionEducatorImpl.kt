@@ -262,6 +262,22 @@ class PermissionEducatorImpl @Inject constructor(
                 priority = PermissionImportance.MEDIUM
             )
             
+            // ========== FOREGROUND SERVICE PERMISSIONS ==========
+            Permission.FOREGROUND_SERVICE_LOCATION -> PermissionEducationContent(
+                permission = permission,
+                title = "Background Service Location",
+                description = "Allow the app to run location-based services in the background for continuous Nordic beacon scanning.",
+                rationale = "Foreground service location permission is required by Android 14+ for continuous beacon monitoring when the app is not actively in use.",
+                benefits = listOf(
+                    "Continuous Nordic beacon scanning",
+                    "Background location-based services",
+                    "Persistent beacon monitoring",
+                    "Reliable detection even when screen is off"
+                ),
+                icon = "location_on",
+                priority = PermissionImportance.HIGH
+            )
+            
             // ========== MICROPHONE PERMISSIONS ==========
             Permission.RECORD_AUDIO -> PermissionEducationContent(
                 permission = permission,

@@ -5,9 +5,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.fragment.app.FragmentActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import com.nordicbeacon.scanner.R
@@ -43,7 +43,7 @@ import javax.inject.Inject
  * @author Senior Android Developer
  */
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     // ========== VIEW MODEL & STATE ==========
     
@@ -202,14 +202,14 @@ class MainActivity : ComponentActivity() {
                 "Nordic Beacon Scanning", 
                 "This app requires Bluetooth and location permissions to detect Nordic beacons in your area."
             )
-            .onGranted { result ->
+            .onGranted { result: PermissionResult.Granted ->
                 Timber.i("✅ All Nordic scanning permissions granted: ${result.permissions.size}")
                 startBeaconScanningService()
             }
-            .onDenied { result ->
+            .onDenied { result: PermissionResult.Denied ->
                 handlePermissionDenialResult(result)
             }
-            .onError { error ->
+            .onError { error: PermissionResult.Error ->
                 Timber.e("❌ Permission request error: ${error.exception}")
                 showPermissionErrorDialog(error)
             }
@@ -225,7 +225,7 @@ class MainActivity : ComponentActivity() {
             .request(*PermissionGroups.BLE_SCANNING_ESSENTIAL.toTypedArray())
             .educate(true)
             .rationale("Nordic BLE Scanning", "Required for Nordic beacon detection")
-            .onResult { result ->
+            .onResult { result: PermissionResult ->
                 handlePermissionResult(result)
             }
             .check()
@@ -538,15 +538,15 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * ✅ Handle granted permissions
+     * ✅ Handle granted permissions (Legacy - deprecated with new system)
      */
     private fun handleGrantedPermissions(grantedPermissions: List<String>) {
         if (grantedPermissions.isNotEmpty()) {
             Timber.i("✅ Successfully granted: ${grantedPermissions.joinToString(", ")}")
             
-            // Log permission step completion
+            // Simple logging without display name lookup (new system handles this)
             grantedPermissions.forEach { permission ->
-                Timber.d("✅ Permission granted: ${permissionManager.getPermissionDisplayName(permission)}")
+                Timber.d("✅ Permission granted: $permission")
             }
         }
     }
@@ -592,7 +592,7 @@ class MainActivity : ComponentActivity() {
                     startBeaconScanningService()
                 }
                 .setNegativeButton("⚙️ Get Full Permissions") { _, _ ->
-                    requestMissingPermissions() // Continue sequential flow
+                    requestBlePermissions() // Request full BLE permissions
                 }
                 .setCancelable(true)
             

@@ -123,6 +123,13 @@ enum class Permission(
         minSdkVersion = Build.VERSION_CODES.TIRAMISU
     ),
     
+    // ========== FOREGROUND SERVICE PERMISSIONS ==========
+    FOREGROUND_SERVICE_LOCATION(
+        "android.permission.FOREGROUND_SERVICE_LOCATION",
+        PermissionGroup.BLUETOOTH,  // Group with BLE since it's location-based service
+        minSdkVersion = 34 // Android 14 (API 34)
+    ),
+    
     // ========== MICROPHONE PERMISSIONS ==========
     RECORD_AUDIO(
         Manifest.permission.RECORD_AUDIO,

@@ -29,12 +29,13 @@ object PermissionGroups {
      * 📡 Nordic BLE Beacon Scanning (Complete)
      * 
      * Full permission set for optimal BLE beacon scanning experience
-     * including background scanning capabilities.
+     * including background scanning capabilities and foreground service.
      */
     val BLE_SCANNING_COMPLETE = BLE_SCANNING_ESSENTIAL + setOf(
         Permission.LOCATION_BACKGROUND,
         Permission.BLUETOOTH_CONNECT,
-        Permission.BLUETOOTH_ADVERTISE
+        Permission.BLUETOOTH_ADVERTISE,
+        Permission.FOREGROUND_SERVICE_LOCATION // Required for foreground service on Android 14+
     )
     
     /**
