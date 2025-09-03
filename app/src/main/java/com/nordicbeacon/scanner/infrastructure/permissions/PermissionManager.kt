@@ -32,31 +32,43 @@ class PermissionManager @Inject constructor(
 ) {
 
     companion object {
-        /**
-         * 📋 Nordic Beacon Scanner Required Permissions
-         */
-        private val REQUIRED_PERMISSIONS = arrayOf(
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION
-        )
         
         /**
-         * 📱 Modern Android permissions (API 31+)
+         * 📋 Sequential Permission Request Strategy
+         * 
+         * Research-based optimal order cho BLE beacon scanning:
+         * 1. Basic location first (required cho all BLE scanning)
+         * 2. BLE permissions (API 31+ dependency on location)
+         * 3. Background location last (least likely to be granted)
          */
-        private val MODERN_BLE_PERMISSIONS = arrayOf(
+        
+        // Step 1: Foundation permissions (always required)
+        private val STEP_1_FOUNDATION = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+        
+        // Step 2: BLE permissions (API level dependent)  
+        private val STEP_2_BLUETOOTH_LEGACY = arrayOf(
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN
+        )
+        
+        private val STEP_2_BLUETOOTH_MODERN = arrayOf(
             Manifest.permission.BLUETOOTH_SCAN,
             Manifest.permission.BLUETOOTH_CONNECT
         )
         
+        // Step 3: Background permissions (most restrictive)
+        private val STEP_3_BACKGROUND = arrayOf(
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        )
+        
         /**
-         * 🔋 Critical permissions cho background operation
+         * 🔋 Critical permissions cho basic Nordic scanning
          */
         private val CRITICAL_PERMISSIONS = arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
-            Manifest.permission.BLUETOOTH_SCAN
+            Manifest.permission.BLUETOOTH_SCAN // Modern Android
         )
     }
 
@@ -100,16 +112,105 @@ class PermissionManager @Inject constructor(
     }
 
     /**
+     * 🔍 Can start basic scanning (foundation + minimum BLE permissions)
+     */
+    fun canStartBasicScanning(): Boolean {
+        val foundationGranted = hasPermissions(STEP_1_FOUNDATION)
+        
+        val bleGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            hasPermissions(arrayOf(Manifest.permission.BLUETOOTH_SCAN))
+        } else {
+            hasPermissions(STEP_2_BLUETOOTH_LEGACY)
+        }
+        
+        return foundationGranted && bleGranted
+    }
+
+    /**
+     * 📊 Get current sequential permission status
+     */
+    fun getSequentialPermissionStatus(): SequentialPermissionResult {
+        val completedSteps = mutableListOf<PermissionStep>()
+        val remainingSteps = mutableListOf<PermissionStep>()
+        
+        // Check each step
+        val allSteps = listOf(
+            PermissionStep.FOUNDATION,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PermissionStep.BLUETOOTH_MODERN else PermissionStep.BLUETOOTH_LEGACY,
+            PermissionStep.BACKGROUND
+        )
+        
+        var currentStep: PermissionStep? = null
+        
+        for (step in allSteps) {
+            val permissions = getPermissionsForStep(step)
+            if (hasPermissions(permissions)) {
+                completedSteps.add(step)
+            } else if (currentStep == null) {
+                currentStep = step
+                remainingSteps.add(step)
+            } else {
+                remainingSteps.add(step)
+            }
+        }
+        
+        return SequentialPermissionResult(
+            completedSteps = completedSteps,
+            currentStep = currentStep,
+            remainingSteps = remainingSteps.drop(1), // Remaining after current
+            canStartScanning = canStartBasicScanning(),
+            hasOptimalPermissions = currentStep == null // All steps complete
+        )
+    }
+
+    /**
+     * 📋 Get next permission step that needs to be requested
+     */
+    fun getNextPermissionStep(): PermissionStep? {
+        return getSequentialPermissionStatus().currentStep
+    }
+
+    /**
+     * 📱 Get permissions for specific step
+     */
+    fun getPermissionsForStep(step: PermissionStep): Array<String> {
+        return when (step) {
+            PermissionStep.FOUNDATION -> STEP_1_FOUNDATION
+            PermissionStep.BLUETOOTH_LEGACY -> STEP_2_BLUETOOTH_LEGACY  
+            PermissionStep.BLUETOOTH_MODERN -> STEP_2_BLUETOOTH_MODERN
+            PermissionStep.BACKGROUND -> STEP_3_BACKGROUND
+        }
+    }
+
+    /**
+     * 🎯 Check if specific permission set is granted
+     */
+    private fun hasPermissions(permissions: Array<String>): Boolean {
+        return permissions.all { permission ->
+            ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    /**
      * 📱 Get device-appropriate permissions based on Android version
      */
     private fun getRequiredPermissionsForDevice(): Array<String> {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // Android 12+ (API 31+) - new BLE permissions
-            REQUIRED_PERMISSIONS + MODERN_BLE_PERMISSIONS
+        val allPermissions = mutableListOf<String>()
+        
+        // Always add foundation
+        allPermissions.addAll(STEP_1_FOUNDATION)
+        
+        // Add BLE permissions based on API level
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            allPermissions.addAll(STEP_2_BLUETOOTH_MODERN)
         } else {
-            // Legacy Android - traditional permissions
-            REQUIRED_PERMISSIONS
+            allPermissions.addAll(STEP_2_BLUETOOTH_LEGACY)
         }
+        
+        // Add background
+        allPermissions.addAll(STEP_3_BACKGROUND)
+        
+        return allPermissions.toTypedArray()
     }
 
     // ========== PERMISSION ANALYSIS ==========
@@ -218,6 +319,44 @@ data class PermissionReport(
     fun isFullyGranted(): Boolean = denied.isEmpty()
     fun hasCriticalIssues(): Boolean = hasCriticalMissing
 }
+
+/**
+ * 📋 Permission Request Steps (Sequential Strategy)
+ * 
+ * Research-based order cho optimal user acceptance:
+ * - Foundation first (most accepted)
+ * - BLE permissions (medium acceptance)  
+ * - Background last (most restrictive)
+ */
+enum class PermissionStep(val description: String, val userExplanation: String) {
+    FOUNDATION(
+        "Foundation Location", 
+        "📍 Location access is required để detect Nordic beacons nearby"
+    ),
+    BLUETOOTH_LEGACY(
+        "Bluetooth Access", 
+        "📡 Bluetooth permission cho scanning Nordic beacon devices"
+    ),
+    BLUETOOTH_MODERN(
+        "Modern Bluetooth", 
+        "📱 Enhanced Bluetooth scanning permission (Android 12+)"
+    ),
+    BACKGROUND(
+        "Background Scanning", 
+        "🔋 Background permission cho continuous Nordic detection when screen off"
+    )
+}
+
+/**
+ * 📊 Sequential Permission Strategy Result
+ */
+data class SequentialPermissionResult(
+    val completedSteps: List<PermissionStep>,
+    val currentStep: PermissionStep?,
+    val remainingSteps: List<PermissionStep>,
+    val canStartScanning: Boolean, // Can start với basic permissions
+    val hasOptimalPermissions: Boolean // Has all permissions cho best experience
+)
 
 /**
  * 📚 Permission Education Content
