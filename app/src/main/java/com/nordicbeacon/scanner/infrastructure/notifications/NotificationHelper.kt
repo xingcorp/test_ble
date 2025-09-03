@@ -458,6 +458,62 @@ class NotificationHelper @Inject constructor(
         }
     }
 
+    // ========== ANDROID 14+ SPECIFIC NOTIFICATIONS ==========
+
+    /**
+     * 🔔 Create permission required notification
+     */
+    fun createPermissionRequiredNotification(): Notification {
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            context, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        return NotificationCompat.Builder(context, ERROR_CHANNEL_ID)
+            .setContentTitle("🔐 Permissions Required")
+            .setContentText("Nordic beacon scanning needs location permissions")
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText("Nordic beacon scanning requires location permissions to function properly. Please grant permissions in Settings."))
+            .setSmallIcon(R.drawable.ic_permission_required)
+            .setColor(ContextCompat.getColor(context, R.color.warning_orange))
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
+    }
+
+    /**
+     * 🔔 Create limited functionality notification
+     */
+    fun createLimitedFunctionalityNotification(): Notification {
+        return NotificationCompat.Builder(context, SCANNING_CHANNEL_ID)
+            .setContentTitle("⚠️ Limited Functionality")
+            .setContentText("Nordic scanning running with reduced capabilities")
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText("Nordic beacon scanning is running but with limited background capabilities due to permission restrictions."))
+            .setSmallIcon(R.drawable.ic_warning)
+            .setColor(ContextCompat.getColor(context, R.color.warning_orange))
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .build()
+    }
+
+    /**
+     * 🔔 Show notification with specific ID
+     */
+    fun showNotification(notificationId: Int, notification: Notification) {
+        try {
+            notificationManager.notify(notificationId, notification)
+            Timber.d("🔔 Notification shown with ID: $notificationId")
+        } catch (e: Exception) {
+            Timber.e(e, "❌ Failed to show notification")
+        }
+    }
+
     // ========== CONSTANTS ==========
 
     companion object {

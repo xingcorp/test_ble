@@ -83,8 +83,8 @@ class MainActivity : FragmentActivity() {
         initializeUI()
         observeViewModel()
         
-        // Check permissions và start scanning if ready
-        checkPermissionsAndStartScanning()
+        // Check permissions và start scanning if ready - moved to onResume to satisfy Android 14 FGS eligibility
+        // checkPermissionsAndStartScanning()
         
         // Handle battery optimization intent action
         handleBatteryOptimizationIntent(intent)
@@ -96,6 +96,9 @@ class MainActivity : FragmentActivity() {
         
         // Check if service is still running
         viewModel.checkServiceStatus()
+
+        // Android 14+: ensure we (re-)start scanning only when activity is foreground (eligible state)
+        checkPermissionsAndStartScanning()
     }
 
     override fun onPause() {
@@ -708,10 +711,22 @@ class MainActivity : FragmentActivity() {
                 return@launch
             }
             
-            // Start the beacon scanning service
+            // Start the beacon scanning service (ensure eligible state on Android 14)
             try {
-                val intent = BeaconScanningService.createStartIntent(this@MainActivity)
-                startService(intent)
+                if (!lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) {
+                    lifecycle.addObserver(object : androidx.lifecycle.DefaultLifecycleObserver {
+                        override fun onResume(owner: androidx.lifecycle.LifecycleOwner) {
+                            owner.lifecycle.removeObserver(this)
+                            androidx.core.content.ContextCompat.startForegroundService(
+                                this@MainActivity,
+                                BeaconScanningService.createStartIntent(this@MainActivity)
+                            )
+                        }
+                    })
+                } else {
+                    val intent = BeaconScanningService.createStartIntent(this@MainActivity)
+                    androidx.core.content.ContextCompat.startForegroundService(this@MainActivity, intent)
+                }
                 
                 // Update UI state
                 findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_start_scanning)?.apply {

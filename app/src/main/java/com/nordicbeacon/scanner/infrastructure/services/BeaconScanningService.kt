@@ -127,6 +127,7 @@ class BeaconScanningService : LifecycleService() {
             Timber.w("⚠️ Scanning already in progress")
             return
         }
+        isServiceRunning = true
         
         Timber.i("🔍 Starting Nordic beacon scanning...")
         
@@ -369,14 +370,36 @@ class BeaconScanningService : LifecycleService() {
 
     /**
      * 🔔 Start foreground service với initial notification
+     *
+     * Android 14+ Critical Fix: Validates permissions và app state before starting FGS
      */
     private fun startForegroundWithNotification() {
         val notification = notificationHelper.createInitialScanningNotification()
-        
+
         try {
-            startForeground(NOTIFICATION_ID, notification)
+            // Android 14+ Critical Permission Validation
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                if (!validateLocationForegroundServicePermissions()) {
+                    Timber.e("❌ Missing required permissions for location foreground service")
+                    handlePermissionMissingFallback()
+                    return
+                }
+            }
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                startForeground(
+                    NOTIFICATION_ID,
+                    notification,
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+                )
+            } else {
+                startForeground(NOTIFICATION_ID, notification)
+            }
             Timber.i("🔔 Foreground service started with notification")
-            
+
+        } catch (e: SecurityException) {
+            Timber.e(e, "❌ SecurityException starting foreground service - handling gracefully")
+            handleSecurityExceptionFallback(e)
         } catch (e: Exception) {
             Timber.e(e, "❌ Failed to start foreground service")
             throw e
@@ -454,10 +477,109 @@ class BeaconScanningService : LifecycleService() {
         }
     }
 
+    // ========== ANDROID 14+ PERMISSION VALIDATION ==========
+
+    /**
+     * 🔐 Validates Android 14+ location foreground service permissions
+     */
+    private fun validateLocationForegroundServicePermissions(): Boolean {
+        val hasLocationPermission = checkLocationPermissions()
+        val hasForegroundServiceLocationPermission = checkForegroundServiceLocationPermission()
+
+        Timber.d("🔐 Permission validation:")
+        Timber.d("   📍 Location permissions: $hasLocationPermission")
+        Timber.d("   🚀 Foreground service location: $hasForegroundServiceLocationPermission")
+
+        return hasLocationPermission && hasForegroundServiceLocationPermission
+    }
+
+    /**
+     * 📍 Check runtime location permissions
+     */
+    private fun checkLocationPermissions(): Boolean {
+        val fineLocation = androidx.core.content.ContextCompat.checkSelfPermission(
+            this, android.Manifest.permission.ACCESS_FINE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+        val coarseLocation = androidx.core.content.ContextCompat.checkSelfPermission(
+            this, android.Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+        return fineLocation || coarseLocation
+    }
+
+    /**
+     * 🚀 Check foreground service location permission (Android 14+)
+     */
+    private fun checkForegroundServiceLocationPermission(): Boolean {
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            androidx.core.content.ContextCompat.checkSelfPermission(
+                this, android.Manifest.permission.FOREGROUND_SERVICE_LOCATION
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        } else {
+            true // Not required on older versions
+        }
+    }
+
+    // ========== FALLBACK STRATEGIES ==========
+
+    /**
+     * 🛡️ Handle permission missing fallback
+     */
+    private fun handlePermissionMissingFallback() {
+        Timber.w("🛡️ Falling back to non-location foreground service")
+
+        try {
+            val notification = notificationHelper.createInitialScanningNotification()
+
+            // Start without location type
+            startForeground(NOTIFICATION_ID, notification)
+
+            Timber.i("✅ Started foreground service without location type")
+
+        } catch (e: Exception) {
+            Timber.e(e, "❌ Fallback foreground service also failed")
+            handleCriticalServiceFailure(e)
+        }
+    }
+
+    /**
+     * 🚨 Handle SecurityException fallback
+     */
+    private fun handleSecurityExceptionFallback(exception: SecurityException) {
+        Timber.w("🚨 SecurityException fallback - attempting alternative strategies")
+
+        try {
+            // Strategy 1: Start without location type
+            val notification = notificationHelper.createInitialScanningNotification()
+            startForeground(NOTIFICATION_ID, notification)
+
+            Timber.i("✅ Fallback: Started foreground service without location type")
+
+        } catch (e: Exception) {
+            Timber.e(e, "❌ All foreground service strategies failed")
+            handleCriticalServiceFailure(e)
+        }
+    }
+
+    /**
+     * 🚨 Handle critical service failure
+     */
+    private fun handleCriticalServiceFailure(exception: Exception) {
+        Timber.e(exception, "🚨 Critical service failure - service cannot start")
+
+        // Stop service gracefully
+        stopSelf()
+
+        // TODO: Send crash report to analytics
+        // TODO: Show user-friendly error dialog
+    }
+
     // ========== SERVICE CONTROL API ==========
 
     companion object {
         private const val NOTIFICATION_ID = 1001
+        private const val PERMISSION_NOTIFICATION_ID = 1002
         
         // Service action constants
         const val ACTION_START_SCANNING = "com.nordicbeacon.scanner.START_SCANNING"
