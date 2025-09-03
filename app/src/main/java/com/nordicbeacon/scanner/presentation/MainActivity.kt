@@ -18,6 +18,7 @@ import com.nordicbeacon.scanner.infrastructure.oem.education.UserEducationHelper
 import com.nordicbeacon.scanner.infrastructure.workers.BeaconScanWorker
 import com.nordicbeacon.scanner.analytics.AnalyticsIntegrationManager
 import com.nordicbeacon.scanner.analytics.dashboard.AnalyticsDashboardActivity
+import com.nordicbeacon.scanner.infrastructure.permissions.PermissionManager
 import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -49,6 +50,7 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var batteryOptimizationCoordinator: BatteryOptimizationCoordinator
     @Inject lateinit var userEducationHelper: UserEducationHelper
     @Inject lateinit var analyticsIntegrationManager: AnalyticsIntegrationManager
+    @Inject lateinit var permissionManager: PermissionManager
     
     // ========== PERMISSION HANDLING ==========
     
@@ -109,10 +111,28 @@ class MainActivity : ComponentActivity() {
     private fun initializeUI() {
         Timber.d("🎨 Initializing UI components...")
         
-        // TODO: Initialize actual UI components when layout is ready
-        // For now, just log initialization
+        // Initialize button click listeners (layout already set trong onCreate)
+        findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_start_scanning)?.setOnClickListener {
+            Timber.i("🚀 Start scanning button clicked")
+            startBeaconScanning()
+        }
         
-        Timber.i("✅ UI components initialized")
+        findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_stop_scanning)?.setOnClickListener {
+            Timber.i("⏹️ Stop scanning button clicked") 
+            stopBeaconScanning()
+        }
+        
+        findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_clear_history)?.setOnClickListener {
+            Timber.i("🧹 Clear history button clicked")
+            clearDetectionHistory()
+        }
+        
+        findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_scan_toggle)?.setOnClickListener {
+            Timber.i("📱 FAB scan toggle clicked")
+            toggleScanning()
+        }
+        
+        Timber.i("✅ UI components initialized với click listeners")
     }
 
     /**
@@ -219,7 +239,8 @@ class MainActivity : ComponentActivity() {
     /**
      * 🙏 Request missing permissions từ user
      */
-    private fun requestMissingPermissions(missingPermissions: List<String>) {
+    private fun requestMissingPermissions() {
+        val missingPermissions = permissionManager.getMissingPermissions()
         Timber.i("🙏 Requesting ${missingPermissions.size} missing permission(s)")
         
         // TODO: Show educational dialog trước khi request permissions
@@ -357,6 +378,107 @@ class MainActivity : ComponentActivity() {
     private fun handlePermissionStatusChange(status: Any) {
         // TODO: Implement when PermissionStatus model is defined
         Timber.d("🔐 Permission status changed")
+    }
+
+    // ========== UI ACTION HANDLERS ==========
+
+    /**
+     * 🚀 Start beacon scanning
+     */
+    private fun startBeaconScanning() {
+        Timber.i("🚀 Starting Nordic beacon scanning...")
+        
+        // Check permissions first
+        if (!permissionManager.hasRequiredPermissions()) {
+            requestMissingPermissions()
+            return
+        }
+        
+        // Start the beacon scanning service
+        lifecycleScope.launch {
+            try {
+                val intent = BeaconScanningService.createStartIntent(this@MainActivity)
+                startService(intent)
+                
+                // Update UI state
+                findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_start_scanning)?.apply {
+                    isEnabled = false
+                }
+                findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_stop_scanning)?.apply {
+                    isEnabled = true
+                }
+                
+                Timber.i("✅ Nordic beacon scanning started successfully")
+                
+            } catch (e: Exception) {
+                Timber.e(e, "❌ Failed to start beacon scanning")
+            }
+        }
+    }
+
+    /**
+     * ⏹️ Stop beacon scanning  
+     */
+    private fun stopBeaconScanning() {
+        Timber.i("⏹️ Stopping Nordic beacon scanning...")
+        
+        lifecycleScope.launch {
+            try {
+                val intent = BeaconScanningService.createStopIntent(this@MainActivity)
+                startService(intent)
+                
+                // Update UI state
+                findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_start_scanning)?.apply {
+                    isEnabled = true
+                }
+                findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_stop_scanning)?.apply {
+                    isEnabled = false
+                }
+                
+                Timber.i("✅ Nordic beacon scanning stopped")
+                
+            } catch (e: Exception) {
+                Timber.e(e, "❌ Failed to stop beacon scanning")
+            }
+        }
+    }
+
+    /**
+     * 🧹 Clear detection history
+     */
+    private fun clearDetectionHistory() {
+        Timber.i("🧹 Clearing detection history...")
+        
+        lifecycleScope.launch {
+            try {
+                // Clear via ViewModel
+                viewModel.clearDetectionHistory()
+                
+                // Update UI
+                findViewById<android.widget.TextView>(R.id.txt_detection_count)?.text = "0"
+                
+                Timber.i("✅ Detection history cleared")
+                
+            } catch (e: Exception) {
+                Timber.e(e, "❌ Failed to clear detection history")
+            }
+        }
+    }
+
+    /**
+     * 🔄 Toggle scanning state
+     */
+    private fun toggleScanning() {
+        Timber.i("🔄 Toggling scanning state...")
+        
+        val startButton = findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_start_scanning)
+        val isCurrentlyScanning = startButton?.isEnabled == false
+        
+        if (isCurrentlyScanning) {
+            stopBeaconScanning()
+        } else {
+            startBeaconScanning()
+        }
     }
 
     /**
