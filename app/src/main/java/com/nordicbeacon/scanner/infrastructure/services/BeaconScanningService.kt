@@ -202,9 +202,20 @@ class BeaconScanningService : LifecycleService() {
                 val systemValidation = systemCompatibilityUseCase.validateSystemRequirements()
                 
                 if (!systemValidation.isFullyCompatible()) {
-                    Timber.w("⚠️ System not fully compatible: ${systemValidation.getMissingRequirements()}")
-                    handleSystemIncompatibility(systemValidation)
-                    return
+                    val missingReqs = systemValidation.getMissingRequirements()
+                    Timber.w("⚠️ System validation issues found: $missingReqs")
+                    
+                    // Check if it's only battery optimization issue
+                    if (missingReqs.size == 1 && missingReqs.contains("Background services restricted")) {
+                        Timber.w("🔋 Battery optimization is enabled - Service will run with limitations")
+                        Timber.w("💡 Tip: Disable battery optimization for better background scanning")
+                        // Continue running - battery optimization is not fatal for foreground service
+                    } else {
+                        // Critical issues - stop service
+                        Timber.e("❌ Critical requirements missing: $missingReqs")
+                        handleSystemIncompatibility(systemValidation)
+                        return
+                    }
                 }
                 
                 // Step 2: Check battery optimization status

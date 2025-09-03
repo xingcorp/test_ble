@@ -1,11 +1,18 @@
 package com.nordicbeacon.scanner.domain.usecases
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.PowerManager
+import androidx.core.content.ContextCompat
 import com.nordicbeacon.scanner.domain.entities.NordicBeacon
 import com.nordicbeacon.scanner.domain.models.BeaconScanResult
 import com.nordicbeacon.scanner.domain.models.BeaconDetectionStats
 import com.nordicbeacon.scanner.domain.models.ScanConfig
 import com.nordicbeacon.scanner.domain.models.ScanningState
 import com.nordicbeacon.scanner.domain.repositories.IBeaconRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -197,26 +204,99 @@ class ScanBeaconUseCase @Inject constructor(
  */
 @Singleton  
 class SystemCompatibilityUseCase @Inject constructor(
-    private val beaconRepository: IBeaconRepository
+    private val beaconRepository: IBeaconRepository,
+    @ApplicationContext private val context: Context
 ) {
     
     /**
      * ✅ Validates system requirements cho Nordic beacon scanning
      */
     suspend fun validateSystemRequirements(): SystemValidationResult {
-        // Implementation sẽ check:
-        // - Bluetooth LE support
-        // - Required permissions
-        // - Android version compatibility
-        // - Hardware capabilities
+        // Check Bluetooth LE support
+        val hasBluetoothLE = context.packageManager
+            .hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)
+        
+        // Check required permissions
+        val hasLocationPermission = checkLocationPermissions()
+        val hasBluetoothPermission = checkBluetoothPermissions()
+        val hasRequiredPermissions = hasLocationPermission && hasBluetoothPermission
+        
+        // Check Android version (minSdk = 26, so always true)
+        val isAndroidVersionSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+        
+        // Check if can run background services
+        val canRunBackgroundServices = checkBackgroundServicesCapability()
+        
+        // Generate recommendations
+        val recommendations = generateRecommendations(
+            hasBluetoothLE,
+            hasRequiredPermissions,
+            canRunBackgroundServices
+        )
         
         return SystemValidationResult(
-            hasBluetoothLE = true, // TODO: Implement actual check
-            hasRequiredPermissions = false, // TODO: Check permissions
-            isAndroidVersionSupported = true, // API 21+ always supported
-            canRunBackgroundServices = true, // TODO: Check battery optimization
-            recommendations = listOf()
+            hasBluetoothLE = hasBluetoothLE,
+            hasRequiredPermissions = hasRequiredPermissions,
+            isAndroidVersionSupported = isAndroidVersionSupported,
+            canRunBackgroundServices = canRunBackgroundServices,
+            recommendations = recommendations
         )
+    }
+    
+    private fun checkLocationPermissions(): Boolean {
+        val fineLocation = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        
+        val coarseLocation = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        
+        return fineLocation || coarseLocation
+    }
+    
+    private fun checkBluetoothPermissions(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // Android 12+ requires BLUETOOTH_SCAN for BLE scanning
+            ContextCompat.checkSelfPermission(
+                context, Manifest.permission.BLUETOOTH_SCAN
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            // Older versions: BLUETOOTH permission is granted at install time
+            // Just check if Bluetooth is available
+            true
+        }
+    }
+    
+    private fun checkBackgroundServicesCapability(): Boolean {
+        // Check if battery optimization is disabled for this app
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            powerManager?.isIgnoringBatteryOptimizations(context.packageName) ?: false
+        } else {
+            // Pre-Marshmallow doesn't have battery optimization
+            true
+        }
+    }
+    
+    private fun generateRecommendations(
+        hasBluetoothLE: Boolean,
+        hasRequiredPermissions: Boolean,
+        canRunBackgroundServices: Boolean
+    ): List<String> {
+        val recommendations = mutableListOf<String>()
+        
+        if (!hasBluetoothLE) {
+            recommendations.add("Device does not support Bluetooth LE")
+        }
+        if (!hasRequiredPermissions) {
+            recommendations.add("Grant all required permissions for beacon scanning")
+        }
+        if (!canRunBackgroundServices) {
+            recommendations.add("Disable battery optimization for continuous scanning")
+        }
+        
+        return recommendations
     }
 }
 
@@ -232,8 +312,10 @@ data class SystemValidationResult(
 ) {
     
     fun isFullyCompatible(): Boolean {
+        // Battery optimization is not critical for foreground service
+        // Only check critical requirements
         return hasBluetoothLE && hasRequiredPermissions && 
-               isAndroidVersionSupported && canRunBackgroundServices
+               isAndroidVersionSupported
     }
     
     fun getMissingRequirements(): List<String> {
