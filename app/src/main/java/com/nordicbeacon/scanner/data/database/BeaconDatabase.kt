@@ -21,7 +21,6 @@ import android.content.Context
     version = 1,
     exportSchema = true
 )
-@TypeConverters(Converters::class)
 abstract class BeaconDatabase : RoomDatabase() {
     
     /**
@@ -84,11 +83,23 @@ abstract class BeaconDatabase : RoomDatabase() {
 }
 
 /**
- * 🔄 Type Converters cho Room database
+ * 🔄 Type Converters cho Room database (Future Use)
  * 
- * Handles conversion của complex types cho database storage
+ * When complex type conversions needed, implement here:
+ * - Date/LocalDateTime conversions
+ * - Enum serialization
+ * - Custom object JSON conversion
+ * 
+ * Usage: Add @TypeConverters(Converters::class) to database
  */
-class Converters {
-    // Currently no custom type conversions needed
-    // Future: Date conversions, enum conversions, etc.
-}
+// class Converters {
+//     @TypeConverter
+//     fun fromTimestamp(value: Long): Date {
+//         return Date(value)
+//     }
+//     
+//     @TypeConverter  
+//     fun dateToTimestamp(date: Date): Long {
+//         return date.time
+//     }
+// }

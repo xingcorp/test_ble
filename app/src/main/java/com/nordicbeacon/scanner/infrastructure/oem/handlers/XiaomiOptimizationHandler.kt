@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import com.nordicbeacon.scanner.infrastructure.oem.models.*
 import com.nordicbeacon.scanner.infrastructure.oem.strategies.BaseOemStrategy
+import com.nordicbeacon.scanner.infrastructure.oem.strategies.OemEducationContent
 import com.nordicbeacon.scanner.infrastructure.oem.detection.OemType
 import timber.log.Timber
 import javax.inject.Inject
@@ -26,6 +27,14 @@ import javax.inject.Inject
  * @author Senior Android Developer  
  */
 class XiaomiOptimizationHandler @Inject constructor() : BaseOemStrategy() {
+
+    override fun getDetectionConfidence(deviceInfo: DeviceInfo): Int {
+        return when {
+            deviceInfo.manufacturer.contains("xiaomi", ignoreCase = true) -> 95
+            deviceInfo.manufacturer.contains("redmi", ignoreCase = true) -> 90
+            else -> 10
+        }
+    }
 
     override val oemName: String = "Xiaomi"
     
@@ -115,11 +124,12 @@ class XiaomiOptimizationHandler @Inject constructor() : BaseOemStrategy() {
                 This setup ensures continuous Nordic beacon detection.
             """.trimIndent(),
             steps = getXiaomiUserInstructions(),
-            troubleshooting = mapOf(
-                "App keeps stopping" to "Check Autostart permissions - this is critical",
-                "Settings not opening" to "Try Security app > Permissions > Autostart",
-                "No Autostart option" to "Look in Settings > Apps > Manage apps"
-            )
+            troubleshooting = """
+                Common Issues:
+                • App keeps stopping → Check Autostart permissions - this is critical
+                • Settings not opening → Try Security app > Permissions > Autostart  
+                • No Autostart option → Look in Settings > Apps > Manage apps
+            """.trimIndent()
         )
     }
 
@@ -220,7 +230,25 @@ class XiaomiOptimizationHandler @Inject constructor() : BaseOemStrategy() {
 
     // ========== INSTRUCTION METHODS ==========
 
-    private fun getXiaomiSettingsPaths(): List<SettingPath> = getSamsungSettingsPaths() // Placeholder
+    private fun getXiaomiSettingsPaths(): List<SettingPath> {
+        return listOf(
+            SettingPath(
+                settingName = "MIUI PowerKeeper",
+                intentAction = null,
+                componentName = ComponentName("com.miui.powerkeeper", "com.miui.powerkeeper.ui.HiddenAppsConfigActivity")
+            ),
+            SettingPath(
+                settingName = "MIUI Background Apps",
+                intentAction = null,
+                componentName = ComponentName("com.miui.powerkeeper", "com.miui.powerkeeper.ui.HiddenAppsContainerManagementActivity")
+            ),
+            SettingPath(
+                settingName = "Battery Optimization",
+                intentAction = "android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS",
+                componentName = null
+            )
+        )
+    }
 
     private fun getXiaomiUserInstructions(): List<String> {
         return listOf(

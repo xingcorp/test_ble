@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import com.nordicbeacon.scanner.infrastructure.oem.models.*
 import com.nordicbeacon.scanner.infrastructure.oem.strategies.BaseOemStrategy
+import com.nordicbeacon.scanner.infrastructure.oem.strategies.OemEducationContent
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -121,11 +122,12 @@ class HuaweiOptimizationHandler @Inject constructor() : BaseOemStrategy() {
                 Proper configuration ensures reliable Nordic beacon scanning even when screen is off.
             """.trimIndent(),
             steps = getHuaweiUserInstructions(),
-            troubleshooting = mapOf(
-                "App still gets killed" to "Check if Protected Apps is enabled cho Nordic Beacon Scanner",
-                "Settings won't open" to "Try Phone Manager app > Protected Apps",
-                "No Protected Apps option" to "Look in Battery > App launch management"
-            )
+            troubleshooting = """
+                Common Issues:
+                • App still gets killed → Check if Protected Apps is enabled cho Nordic Beacon Scanner
+                • Settings won't open → Try Phone Manager app > Protected Apps  
+                • No Protected Apps option → Look in Battery > App launch management
+            """.trimIndent()
         )
     }
 

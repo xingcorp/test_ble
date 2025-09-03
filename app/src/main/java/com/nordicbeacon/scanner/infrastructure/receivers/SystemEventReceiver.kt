@@ -27,6 +27,10 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class SystemEventReceiver : BroadcastReceiver() {
 
+    companion object {
+        private const val ACTION_QUICKBOOT_POWERON = "android.intent.action.QUICKBOOT_POWERON"
+    }
+
     @Inject lateinit var batteryOptimizationCoordinator: BatteryOptimizationCoordinator
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -36,7 +40,7 @@ class SystemEventReceiver : BroadcastReceiver() {
         
         when (action) {
             Intent.ACTION_BOOT_COMPLETED,
-            Intent.ACTION_QUICKBOOT_POWERON -> {
+            ACTION_QUICKBOOT_POWERON -> {
                 handleBootCompleted(context)
             }
             

@@ -88,7 +88,7 @@ class BeaconRepositoryImpl @Inject constructor(
                     // Persist detection locally
                     saveBeaconSighting(beacon)
                 }
-                .map { beacon -> BeaconScanResult.Success(beacon, calculateScanDuration()) }
+                .map { beacon -> BeaconScanResult.Success(beacon, calculateScanDuration()) as BeaconScanResult }
                 .catch { throwable ->
                     Timber.e(throwable, "❌ Beacon scanning failed")
                     _scanningState.value = ScanningState.ERROR

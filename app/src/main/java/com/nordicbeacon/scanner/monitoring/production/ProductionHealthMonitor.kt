@@ -110,7 +110,7 @@ class ProductionHealthMonitor @Inject constructor(
             
             // Calculate composite health score
             val healthComponents = HealthComponents(
-                serviceHealth = serviceHealth?.healthScore ?: 0.0,
+                serviceHealth = if (serviceHealth?.isHealthy == true) serviceHealth.currentMetrics.healthScore else 0.0,
                 securityScore = securityAudit.getSecurityScore() / 100.0,
                 circuitBreakerHealth = calculateCircuitBreakerHealth(circuitBreakerStatus),
                 performanceScore = benchmarkResults?.overallScore?.div(100.0) ?: getLastBenchmarkScore(),

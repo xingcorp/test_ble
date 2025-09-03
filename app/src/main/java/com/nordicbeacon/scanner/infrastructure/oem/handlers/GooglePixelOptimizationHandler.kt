@@ -3,6 +3,7 @@ package com.nordicbeacon.scanner.infrastructure.oem.handlers
 import android.content.Context
 import com.nordicbeacon.scanner.infrastructure.oem.models.*
 import com.nordicbeacon.scanner.infrastructure.oem.strategies.BaseOemStrategy
+import com.nordicbeacon.scanner.infrastructure.oem.strategies.OemEducationContent
 import timber.log.Timber
 import javax.inject.Inject
 

@@ -71,7 +71,7 @@ class AdvancedLogger @Inject constructor(
     fun logBeaconDetection(
         beacon: com.nordicbeacon.scanner.domain.entities.NordicBeacon,
         context: String = "service",
-        additionalData: Map<String, Any> = emptyMap()
+        additionalData: Map<String, Any?> = emptyMap()
     ) {
         
         val logData = mapOf(
@@ -260,7 +260,7 @@ class AdvancedLogger @Inject constructor(
     fun logPerformanceMarker(
         operation: String,
         durationMs: Long,
-        additionalData: Map<String, Any> = emptyMap()
+        additionalData: Map<String, Any?> = emptyMap()
     ) {
         
         val logData = mapOf(
@@ -283,7 +283,7 @@ class AdvancedLogger @Inject constructor(
      */
     inline fun <T> loggedOperation(
         operationName: String,
-        additionalData: Map<String, Any> = emptyMap(),
+        additionalData: Map<String, Any?> = emptyMap(),
         operation: () -> T
     ): T {
         

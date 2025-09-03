@@ -211,17 +211,23 @@ class ServicePerformanceMonitor @Inject constructor(
     }
 
     /**
-     * 🔋 Get battery information
+     * 🔋 Get battery information với proper Android API
      */
     private fun getBatteryInfo(): BatteryInfo {
         return try {
             val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as android.os.BatteryManager
             
+            // Get battery info via Intent filter (proper Android API)
+            val batteryIntent = context.registerReceiver(null, android.content.IntentFilter(android.content.Intent.ACTION_BATTERY_CHANGED))
+            val temperature = batteryIntent?.getIntExtra(android.os.BatteryManager.EXTRA_TEMPERATURE, 250)?.div(10.0) ?: 25.0
+            val voltage = batteryIntent?.getIntExtra(android.os.BatteryManager.EXTRA_VOLTAGE, 3700)?.div(1000.0) ?: 3.7
+            val level = batteryIntent?.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, 50) ?: 50
+            
             BatteryInfo(
-                level = batteryManager.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY),
-                temperature = batteryManager.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_TEMPERATURE) / 10.0, // Convert from tenths
+                level = level, // Proper level from Intent API
+                temperature = temperature, // Proper temperature from Intent API  
                 isCharging = batteryManager.isCharging,
-                voltage = batteryManager.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_VOLTAGE_NOW) / 1000.0 // Convert to volts
+                voltage = voltage // Proper voltage from Intent API
             )
             
         } catch (e: Exception) {
@@ -248,7 +254,7 @@ class ServicePerformanceMonitor @Inject constructor(
     private fun estimateCpuUsage(): Double {
         // Simple CPU estimation based on thread activity
         // In production, would use more sophisticated measurement
-        return Math.random() * 10.0 // Placeholder - actual implementation would measure CPU
+        return kotlin.random.Random.nextDouble() * 10.0 // Placeholder - actual implementation would measure CPU
     }
 
     // ========== ANALYSIS METHODS ==========

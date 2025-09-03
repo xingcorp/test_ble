@@ -3,6 +3,8 @@ package com.nordicbeacon.scanner.analytics.signal.filters
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * 🎯 Kalman Filter for RSSI Signal Smoothing
@@ -23,11 +25,13 @@ import kotlin.math.sqrt
  * 
  * @author Senior Android Developer
  */
-class RssiKalmanFilter(
-    private val processNoise: Double = 0.1,      // Q - process noise covariance (system uncertainty)
-    private val measurementNoise: Double = 4.0,  // R - measurement noise covariance (sensor noise)
+@Singleton
+class RssiKalmanFilter @Inject constructor() {
+
+    // ========== KALMAN FILTER CONFIGURATION ==========
+    private val processNoise: Double = 0.1      // Q - process noise covariance (system uncertainty)
+    private val measurementNoise: Double = 4.0  // R - measurement noise covariance (sensor noise)
     private val initialUncertainty: Double = 1.0 // P - initial estimation error covariance
-) {
 
     // ========== KALMAN FILTER STATE ==========
     

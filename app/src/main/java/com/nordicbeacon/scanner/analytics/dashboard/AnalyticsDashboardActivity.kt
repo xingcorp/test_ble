@@ -6,6 +6,7 @@ import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.nordicbeacon.scanner.R
 import com.nordicbeacon.scanner.analytics.dashboard.viewmodels.AnalyticsDashboardViewModel
+import com.nordicbeacon.scanner.analytics.dashboard.viewmodels.AnalyticsDashboardState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -75,11 +76,29 @@ class AnalyticsDashboardActivity : ComponentActivity() {
         viewModel.startAnalyticsCollection()
     }
 
-    private fun updateDashboard(state: Any) {
-        // TODO: Update dashboard UI
+    private fun updateDashboard(state: AnalyticsDashboardState) {
+        // Update dashboard UI với proper state management
+        when (state) {
+            is AnalyticsDashboardState.Loading -> {
+                Timber.d("📊 Analytics dashboard loading...")
+                // TODO: Show loading indicator
+            }
+            is AnalyticsDashboardState.Success -> {
+                Timber.d("📊 Analytics data loaded successfully")  
+                // TODO: Update UI với analytics data
+            }
+            is AnalyticsDashboardState.Error -> {
+                Timber.e("❌ Analytics error: ${state.message}")
+                // TODO: Show error state UI
+            }
+        }
     }
 
-    private fun updatePerformanceDisplay(metrics: Any) {
-        // TODO: Update performance UI  
+    private fun updatePerformanceDisplay(metrics: com.nordicbeacon.scanner.analytics.monitoring.service.PerformanceMetrics?) {
+        // Update performance UI với proper type safety
+        metrics?.let {
+            // TODO: Update performance UI elements với real metrics
+            Timber.d("📊 Performance updated: Memory=${it.memoryUsageMB}MB, CPU=${it.cpuUsagePercent}%, Health=${it.healthScore}")
+        }
     }
 }

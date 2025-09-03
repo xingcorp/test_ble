@@ -186,11 +186,15 @@ class UserEducationHelper @Inject constructor(
         val strategy = analysis.strategy
         val educationContent = strategy?.getUserEducationContent()
         
-        return educationContent?.troubleshooting ?: mapOf(
-            "Settings won't open" to "Try opening Settings app manually và navigate to Battery section",
-            "App option not found" to "Look cho the app in Apps hoặc Application management section",
-            "Changes don't save" to "Make sure to tap Save/Done after making changes"
-        )
+        return if (educationContent?.troubleshooting?.isNotEmpty() == true) {
+            mapOf("troubleshooting" to educationContent.troubleshooting)
+        } else {
+            mapOf(
+                "Settings won't open" to "Try opening Settings app manually và navigate to Battery section",
+                "App option not found" to "Look cho the app in Apps hoặc Application management section", 
+                "Changes don't save" to "Make sure to tap Save/Done after making changes"
+            )
+        }
     }
 
     /**

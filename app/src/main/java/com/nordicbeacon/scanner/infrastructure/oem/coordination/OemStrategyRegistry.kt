@@ -1,7 +1,10 @@
 package com.nordicbeacon.scanner.infrastructure.oem.coordination
 
+import android.content.Context
 import com.nordicbeacon.scanner.infrastructure.oem.detection.OemType
 import com.nordicbeacon.scanner.infrastructure.oem.handlers.*
+import com.nordicbeacon.scanner.infrastructure.oem.models.BatteryOptimizationResult
+import com.nordicbeacon.scanner.infrastructure.oem.models.OptimizationStatus
 import com.nordicbeacon.scanner.infrastructure.oem.strategies.OemBatteryOptimizationStrategy
 import timber.log.Timber
 import javax.inject.Inject

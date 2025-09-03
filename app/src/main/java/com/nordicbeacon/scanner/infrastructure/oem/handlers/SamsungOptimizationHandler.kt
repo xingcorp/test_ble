@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import com.nordicbeacon.scanner.infrastructure.oem.models.*
 import com.nordicbeacon.scanner.infrastructure.oem.strategies.BaseOemStrategy
+import com.nordicbeacon.scanner.infrastructure.oem.strategies.OemEducationContent
 import com.nordicbeacon.scanner.infrastructure.oem.detection.OemType
 import timber.log.Timber
 import javax.inject.Inject
@@ -117,11 +118,12 @@ class SamsungOptimizationHandler @Inject constructor() : BaseOemStrategy() {
                 Configuring these settings ensures reliable beacon detection.
             """.trimIndent(),
             steps = getSamsungUserInstructions(),
-            troubleshooting = mapOf(
-                "App still stops working" to "Check if app is in Sleeping Apps list",
-                "Settings won't open" to "Try opening Settings > Device Care manually", 
-                "No Device Care option" to "Look for Battery > More battery settings"
-            )
+            troubleshooting = """
+                Common Issues:
+                • App still stops working → Check if app is in Sleeping Apps list
+                • Settings won't open → Try opening Settings > Device Care manually
+                • No Device Care option → Look for Battery > More battery settings
+            """.trimIndent()
         )
     }
 

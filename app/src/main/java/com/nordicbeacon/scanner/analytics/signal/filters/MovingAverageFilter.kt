@@ -2,7 +2,11 @@ package com.nordicbeacon.scanner.analytics.signal.filters
 
 import java.util.LinkedList
 import kotlin.math.abs
+import kotlin.math.exp
+import kotlin.math.pow
 import kotlin.math.sqrt
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * 📊 Moving Average Filter for Distance Smoothing
@@ -18,11 +22,13 @@ import kotlin.math.sqrt
  * 
  * @author Senior Android Developer
  */
-class MovingAverageFilter(
-    private val windowSize: Int = 10,           // Number of measurements trong window
-    private val decayFactor: Double = 0.9,      // Weight decay cho older measurements  
+@Singleton
+class MovingAverageFilter @Inject constructor() {
+
+    // ========== FILTER CONFIGURATION ==========
+    private val windowSize: Int = 10           // Number of measurements trong window
+    private val decayFactor: Double = 0.9      // Weight decay cho older measurements  
     private val outlierThreshold: Double = 2.0  // Standard deviations cho outlier detection
-) {
 
     // ========== FILTER STATE ==========
     
@@ -185,7 +191,7 @@ class MovingAverageFilter(
         val ageSeconds = age / 1000.0
         
         // Exponential decay cho older measurements
-        val timeFactor = Math.exp(-ageSeconds / 30.0) // 30 second half-life
+        val timeFactor = exp(-ageSeconds / 30.0) // 30 second half-life
         
         return confidence * timeFactor * decayFactor
     }

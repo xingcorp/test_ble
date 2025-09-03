@@ -44,10 +44,10 @@ object BeaconModule {
             beaconParsers.clear() // Clear default parsers
             beaconParsers.add(
                 BeaconParser().apply {
-                    setBeaconLayout(BeaconParser.IBEACON_LAYOUT)
+                    setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24")
                     
                     if (BuildConfig.DEBUG) {
-                        Timber.d("📡 iBeacon parser layout: ${BeaconParser.IBEACON_LAYOUT}")
+                        Timber.d("📡 iBeacon parser layout: m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24")
                     }
                 }
             )

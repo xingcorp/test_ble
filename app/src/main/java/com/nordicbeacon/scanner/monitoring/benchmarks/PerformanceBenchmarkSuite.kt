@@ -110,7 +110,7 @@ class PerformanceBenchmarkSuite @Inject constructor(
             
             // Calculate performance metrics
             val avgKalmanTime = processingTimes.average()
-            val maxKalmanTime = processingTimes.maxOrNull() ?: 0L
+            val maxKalmanTime = processingTimes.maxOrNull()?.toDouble() ?: 0.0
             val avgDistanceTime = distanceCalculationTimes.average()
             
             // Performance thresholds (industry standards)
@@ -126,7 +126,7 @@ class PerformanceBenchmarkSuite @Inject constructor(
                 testName = "Kalman Filter & Distance Calculation Performance",
                 passed = overallPassed,
                 score = calculateSignalProcessingScore(avgKalmanTime, avgDistanceTime, kalmanTarget, distanceTarget),
-                executionTimeMs = avgKalmanTime.toLong() + avgDistanceTime.toLong(),
+                executionTimeMs = (avgKalmanTime + avgDistanceTime).toLong(),
                 metrics = mapOf(
                     "kalman_avg_ms" to avgKalmanTime,
                     "kalman_max_ms" to maxKalmanTime,

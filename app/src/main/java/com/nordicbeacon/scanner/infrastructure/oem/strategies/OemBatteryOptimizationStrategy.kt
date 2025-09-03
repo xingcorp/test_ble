@@ -89,7 +89,7 @@ data class OemEducationContent(
     val steps: List<String>,
     val screenshots: List<String> = emptyList(),
     val videoUrl: String? = null,
-    val troubleshooting: Map<String, String> = emptyMap()
+    val troubleshooting: String = ""
 )
 
 /**

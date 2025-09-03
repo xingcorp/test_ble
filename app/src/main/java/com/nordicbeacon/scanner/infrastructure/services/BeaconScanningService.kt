@@ -13,6 +13,7 @@ import com.nordicbeacon.scanner.domain.models.ScanConfig
 import com.nordicbeacon.scanner.infrastructure.notifications.NotificationHelper
 import com.nordicbeacon.scanner.infrastructure.oem.coordination.BatteryOptimizationCoordinator
 import com.nordicbeacon.scanner.infrastructure.oem.education.UserEducationHelper
+import com.nordicbeacon.scanner.infrastructure.oem.models.BatteryOptimizationResult
 import com.nordicbeacon.scanner.infrastructure.oem.models.OptimizationStatus
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
@@ -223,7 +224,7 @@ class BeaconScanningService : LifecycleService() {
                 scanBeaconUseCase.startScanning(scanConfig)
                     .catch { exception -> 
                         Timber.e(exception, "❌ Beacon scanning stream error")
-                        handleScanningError(exception)
+                        handleScanningError(exception as? Exception ?: Exception(exception.message, exception))
                     }
                     .onEach { result -> handleScanResult(result) }
                     .collect()

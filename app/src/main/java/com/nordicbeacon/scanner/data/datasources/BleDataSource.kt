@@ -48,6 +48,7 @@ class BleDataSource @Inject constructor(
     private var isScanning = false
     private var currentScanConfig: ScanConfig? = null
     private val nordicRegion = createNordicRegion()
+    private var currentBeaconConsumer: BeaconConsumer? = null
 
     // ========== CORE SCANNING OPERATIONS ==========
 
@@ -139,6 +140,9 @@ class BleDataSource @Inject constructor(
                     }
                 }
             }
+            
+            // Store consumer reference cho state checking
+            currentBeaconConsumer = beaconConsumer
             
             // Bind BeaconManager service
             beaconManager.bind(beaconConsumer)
@@ -277,7 +281,7 @@ class BleDataSource @Inject constructor(
      */
     fun getBeaconManagerState(): BeaconManagerState {
         return BeaconManagerState(
-            isBound = beaconManager.isBound(null), // TODO: Provide actual consumer
+            isBound = currentBeaconConsumer?.let { beaconManager.isBound(it) } ?: false, // Use stored consumer reference
             isScanning = isScanning,
             foregroundScanPeriod = beaconManager.foregroundScanPeriod,
             backgroundScanPeriod = beaconManager.backgroundScanPeriod,

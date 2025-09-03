@@ -159,7 +159,7 @@ class BeaconInsightsGenerator @Inject constructor(
         }.sortedBy { it.timestamp }
         
         if (measurements.size < 3) {
-            return QualityTrends.insufficient()
+            return QualityTrends.empty()
         }
         
         // Analyze RSSI trends

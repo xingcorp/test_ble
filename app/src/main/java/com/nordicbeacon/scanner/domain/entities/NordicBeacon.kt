@@ -1,6 +1,7 @@
 package com.nordicbeacon.scanner.domain.entities
 
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 import android.os.Parcelable
 
 /**
@@ -13,14 +14,14 @@ import android.os.Parcelable
  */
 @Parcelize
 data class NordicBeacon(
-    val uuid: BeaconUUID,
-    val major: Major?,
-    val minor: Minor?,
-    val signalStrength: SignalStrength,
-    val proximity: Proximity,
-    val detectionTime: Timestamp,
-    val txPower: TxPower?,
-    val metadata: BeaconMetadata = BeaconMetadata()
+    val uuid: @RawValue BeaconUUID,
+    val major: @RawValue Major?,
+    val minor: @RawValue Minor?,
+    val signalStrength: @RawValue SignalStrength,
+    val proximity: @RawValue Proximity,
+    val detectionTime: @RawValue Timestamp,
+    val txPower: @RawValue TxPower?,
+    val metadata: @RawValue BeaconMetadata = BeaconMetadata()
 ) : Parcelable {
 
     /**

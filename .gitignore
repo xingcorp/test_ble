@@ -1,0 +1,81 @@
+# 📱 NORDIC BEACON SCANNER - ANDROID GITIGNORE
+
+# ========== GRADLE FILES ==========
+.gradle/
+**/build/
+build/
+!gradle/wrapper/gradle-wrapper.properties
+/local.properties
+
+# ========== ANDROID STUDIO ==========
+.idea/
+*.iml
+*.ipr
+*.iws
+.navigation/
+captures/
+output.json
+
+# ========== ANDROID BUILD ==========
+app/build/
+*/build/
+**/*.apk
+**/*.ap_
+**/*.aab
+**/intermediates/
+**/generated/
+**/tmp/
+
+# ========== SIGNING FILES ==========
+*.jks
+*.keystore
+key.properties
+
+# ========== LOGS ==========
+*.log
+
+# ========== FIREBASE ==========
+google-services.json
+/app/google-services.json
+
+# ========== DEPENDENCIES ==========
+/.externalNativeBuild
+.cxx/
+*.so
+
+# ========== PROFILING ==========
+*.hprof
+
+# ========== ARCHIVES ==========
+*.zip
+*.tar.gz
+*.rar
+
+# ========== OS FILES ==========
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ========== GENERATED FILES ==========
+/captures
+/app/release/
+proguard/
+
+# ========== LOCAL CONFIG ==========
+gradle.properties.local
+/.vscode/
+
+# ========== TEMPORARY FILES ==========
+*.tmp
+*.temp
+*.swp
+*~
+\#*\#
+
+# ========== SENSITIVE DATA ==========
+secrets.properties
+api_keys.properties

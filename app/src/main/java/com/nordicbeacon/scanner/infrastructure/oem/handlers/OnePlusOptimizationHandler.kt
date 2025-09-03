@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import com.nordicbeacon.scanner.infrastructure.oem.models.*
 import com.nordicbeacon.scanner.infrastructure.oem.strategies.BaseOemStrategy
+import com.nordicbeacon.scanner.infrastructure.oem.strategies.OemEducationContent
 import timber.log.Timber
 import javax.inject.Inject
 

@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import com.nordicbeacon.scanner.infrastructure.oem.models.*
 import com.nordicbeacon.scanner.infrastructure.oem.strategies.BaseOemStrategy
+import com.nordicbeacon.scanner.infrastructure.oem.strategies.OemEducationContent
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -114,11 +115,12 @@ class OppoVivoOptimizationHandler @Inject constructor() : BaseOemStrategy() {
                 Proper configuration ensures the app continues working when screen is off.
             """.trimIndent(),
             steps = getOppoVivoUserInstructions(brandName),
-            troubleshooting = mapOf(
-                "App keeps stopping" to "Check Auto Startup permission - this is mandatory",
-                "Settings won't open" to "Try Security/Privacy app manually",
-                "No auto startup option" to "Look in App management > Permission management"
-            )
+            troubleshooting = """
+                Common Issues:
+                • App keeps stopping → Check Auto Startup permission - this is mandatory
+                • Settings won't open → Try Security/Privacy app manually
+                • No auto startup option → Look in App management > Permission management
+            """.trimIndent()
         )
     }
 

@@ -22,6 +22,7 @@ import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
 /**
  * 📱 Main Activity - Nordic Beacon Scanner
